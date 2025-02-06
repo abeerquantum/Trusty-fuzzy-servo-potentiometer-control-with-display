@@ -1,0 +1,62 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+// Initialize the LCD (I2C address 0x27, 16x2 display)
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Servo object
+Servo myServo;
+
+// Pin Definitions
+const int potPin = A0;  // Potentiometer pin
+const int servoPin = 9; // Servo control pin
+const int buzzerPin = 2; // Buzzer pin
+const int ledPin = 13;   // LED pin
+
+void setup() {
+    // Initialize the LCD
+    lcd.init();
+    lcd.backlight();
+
+    // Attach servo
+    myServo.attach(servoPin);
+
+    // Set pin modes
+    pinMode(buzzerPin, OUTPUT);
+    pinMode(ledPin, OUTPUT);
+
+    // Initial states
+    digitalWrite(buzzerPin, LOW);
+    digitalWrite(ledPin, LOW);
+}
+
+void loop() {
+    // Read potentiometer value (0-1023)
+    int potValue = analogRead(potPin);
+
+    // Map to servo range (0-180 degrees)
+    int servoAngle = map(potValue, 0, 1023, 0, 180);
+
+    // Move the servo
+    myServo.write(servoAngle);
+
+    // Display angle on LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Angle: ");
+    lcd.print(servoAngle);
+    lcd.print(" deg");
+
+    // Check if angle is >= 50 degrees
+    if (servoAngle >= 50) {
+        digitalWrite(buzzerPin, HIGH);
+        digitalWrite(ledPin, HIGH);
+    } else {
+        digitalWrite(buzzerPin, LOW);
+        digitalWrite(ledPin, LOW);
+    }
+
+    // Small delay to stabilize readings
+    delay(200);
+}
